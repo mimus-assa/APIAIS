@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Captura de Identidad{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+  <h1>APIFaVe: Verificacion Facial </h1>
+  <h2>Video streaming </h2>
+  <h2>centre la cara y espere a que se complete el proceso, en seguida de click en el boton</h2>
+  <img id="bg" src="{{ url_for('video_feed') }}"><div style="text-align: right;"></div>
+</div>
+{% endblock %}
