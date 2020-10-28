@@ -1,5 +1,5 @@
 # APIAIS
-is a set of tools that aids in the task of monitoring cameras for security purposes. 
+Aplication Program Interface for Artifisial Inteligence System is a set of tools that aids in the task of monitoring cameras for security purposes. 
 
 the main two tools that have been developed for this aplication are:
 
