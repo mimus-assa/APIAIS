@@ -117,7 +117,7 @@ def get_model(img_size, num_classes):
     return model
 
 num_classes = 3
-model_dir2 = os.path.join(current_dir, 'models/dl/char_seg_plate_v9790_rgb.h5')
+model_dir2 = os.path.join(current_dir, 'models/dl/char_seg_plate_v9898_rgb.h5')
 model2 = get_model((112, 208), num_classes)
 model2.load_weights(model_dir2)
 # model._make_predict_function()
@@ -144,16 +144,18 @@ train_dir = "/home/mimus/apifave/images/snap"
 #aqui comienza ranpv
 def get_plate_coor(gray_image):
     gray_car_image = gray_image
-    threshold_value = threshold_otsu(gray_car_image)
-    binary_car_image = gray_car_image > threshold_value
+    #threshold_value = threshold_otsu(gray_car_image)
+    #binary_car_image = gray_car_image > threshold_value
+    ret1, th1 = cv2.threshold(gray_car_image, 135, 10,  cv2.THRESH_BINARY)
     # threshold_value = threshold_niblack(gray_car_image)
     # binary_car_image = binary_car_image > threshold_value
-    binary_car_image = abs(binary_car_image - 255)
-    #fig2, ax2 = plt.subplots(1)
-    #ax2.imshow(binary_car_image, cmap="gray")
+    th1 = cv2.dilate(np.float32(th1), np.ones((2, 2), np.uint8), iterations=2)
+    binary_car_image = abs(th1 - 255)
+    fig2, ax2 = plt.subplots(1)
+    ax2.imshow(binary_car_image, cmap="gray")
     label_image = measure.label(binary_car_image, background=1, connectivity=2)
     plate_dimensions = (
-        0.02 * label_image.shape[0], 0.3 * label_image.shape[0], 0.01 * label_image.shape[1],
+        0.02 * label_image.shape[0], 0.4 * label_image.shape[0], 0.01 * label_image.shape[1],
         0.4 * label_image.shape[1])
     min_height, max_height, min_width, max_width = plate_dimensions
     plate_objects_cordinates = []
@@ -177,9 +179,9 @@ def get_plate_coor(gray_image):
             # print(region.area)
             if min_row != 0 and min_row != 0 and max_row != 0 and max_col != 0:
                 plate_objects_cordinates.append((min_row, min_col, max_row, max_col))
-                #fig, ax1 = plt.subplots(1)
-                #ax1.imshow(gray_car_image[min_row:max_row, min_col:max_col], cmap="gray")
-    #plt.show()
+                fig, ax1 = plt.subplots(1)
+                ax1.imshow(gray_car_image[min_row:max_row, min_col:max_col], cmap="gray")
+    plt.show()
     # print(plate_objects_cordinates)
     return plate_objects_cordinates
 
@@ -216,7 +218,7 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
         fig, ax1 = plt.subplots(1)
         ax1.imshow(mask, cmap="gray")
         character_dimensions = (
-            0.30 * license_plate.shape[0], 0.55 * license_plate.shape[0], 0.02 * license_plate.shape[1],
+            0.2 * license_plate.shape[0], 0.7 * license_plate.shape[0], 0.02 * license_plate.shape[1],
             0.13 * license_plate.shape[1])
         min_height, max_height, min_width, max_width = character_dimensions
         characters = []
@@ -230,10 +232,10 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
 
             if regions.area < 30:
                 continue
-            if regions.area > 2000:
+            if regions.area > 10000:
                 continue
             # print(regions.area)
-            y0, x0, y1, x1 = regions.bbox[0]-8 , regions.bbox[1]-4 , regions.bbox[2]+8 , regions.bbox[3]+4
+            y0, x0, y1, x1 = regions.bbox[0]+2 , regions.bbox[1]+2 , regions.bbox[2]-2 , regions.bbox[3]-2
             region_height, region_width = y1 - y0, x1 - x0
             #if region_width < .18 * region_height:
                # continue
@@ -505,7 +507,7 @@ def gen(encos):
 
 def gen2():
     t1 = time.time()
-    video_path = "/home/mimus/apifave/vids/vid_8.mp4"
+    video_path = "/home/mimus/apifave/vids/gvv716b.mp4"
     video_capture = cv2.VideoCapture(video_path)
 
     while True:
