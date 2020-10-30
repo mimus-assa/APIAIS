@@ -7,7 +7,7 @@ API FaVe: application Program Interface for Face Verification
 
 API ANPR: application Program Interface for Automatic Number Plate Recognition
 
-install
+# install
 
 
    sudo apt-get install openjdk-8-jdk git python-dev python3-dev python-numpy python3-numpy python-six python3-six build-essential python-pip python3-pip python-virtualenv swig python-wheel python3-wheel libcurl3-dev libcupti-dev
