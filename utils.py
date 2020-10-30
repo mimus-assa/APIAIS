@@ -149,7 +149,6 @@ def cv2_threshold_BINARY_OTSU(img, ka):
     plt.show()
 def cv2_threshold_blur(img,k):
     gray_car_image = img
-
     blur = cv2.GaussianBlur(gray_car_image, (3, 3), 0)
     ret4, th1 = cv2.threshold(blur, k, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     blur = cv2.GaussianBlur(gray_car_image, (5, 5), 0)
@@ -186,7 +185,6 @@ def first_filters(img):
     ret3, th4 = cv2.threshold(gray_car_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     blur = cv2.GaussianBlur(gray_car_image, (5, 5), 0)
     ret4, th5 = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
     fig1, ax1 = plt.subplots(1)
     ax1.imshow(th1)
     plt.title('skimg otsu')
@@ -205,16 +203,10 @@ def first_filters(img):
     plt.show()
 def open_transformation(img):
     binary_car_image = img
-
-
     th1 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_OPEN, np.ones((2, 2), np.uint8))
-
     th2 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
-
     th3 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_OPEN, np.ones((4, 4), np.uint8))
-
     th4 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
-
     th5 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_OPEN, np.ones((6, 6), np.uint8))
     fig1, ax1 = plt.subplots(1)
     ax1.imshow(th1)
@@ -234,16 +226,10 @@ def open_transformation(img):
     plt.show()
 def close_transformation(img):
     binary_car_image = img
-
-
     th1 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_CLOSE, np.ones((2, 2), np.uint8))
-
     th2 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
-
     th3 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_CLOSE, np.ones((4, 4), np.uint8))
-
     th4 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
-
     th5 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_CLOSE, np.ones((6, 6), np.uint8))
     fig1, ax1 = plt.subplots(1)
     ax1.imshow(th1)
@@ -261,18 +247,12 @@ def close_transformation(img):
     ax5.imshow(th5)
     plt.title('k 5 ')
     plt.show()
-
 def erode_transformation(img,j):
     binary_car_image = img
-
     th1 = cv2.erode(binary_car_image, np.ones((6, 1), np.uint8), iterations=j)
-
     th2 = cv2.erode(binary_car_image, np.ones((7, 1), np.uint8), iterations=j)
-
     th3 = cv2.erode(binary_car_image, np.ones((8, 1), np.uint8), iterations=j)
-
     th4 =cv2.erode(binary_car_image, np.ones((9, 1), np.uint8), iterations=j)
-
     th5 = cv2.erode(binary_car_image, np.ones((10, 1), np.uint8), iterations=j)
     fig1, ax1 = plt.subplots(1)
     ax1.imshow(th1)
@@ -292,15 +272,10 @@ def erode_transformation(img,j):
     plt.show()
 def dilate_transformation(img):
     binary_car_image = img
-
     th1 = cv2.dilate(binary_car_image, np.ones((7, 1), np.uint8), iterations=1)
-
     th2 = cv2.dilate(binary_car_image, np.ones((8, 1), np.uint8), iterations=1)
-
     th3 = cv2.dilate(binary_car_image, np.ones((9, 1), np.uint8), iterations=1)
-
     th4 =cv2.dilate(binary_car_image, np.ones((10, 1), np.uint8), iterations=1)
-
     th5 = cv2.dilate(binary_car_image, np.ones((11, 1), np.uint8), iterations=1)
     fig1, ax1 = plt.subplots(1)
     ax1.imshow(th1)
@@ -318,38 +293,19 @@ def dilate_transformation(img):
     ax5.imshow(th5)
     plt.title('k 5 ')
     plt.show()
-
 #aqui comienza ranpv
 def get_plate_coor(gray_image,asasa):
     rgb_image = asasa.copy()
-
     global first_filters, skimage_niblack
     gray_car_image = gray_image
     #skimage_niblack(gray_car_image, [0.1, 0.3, 0.5, 0.7, 0.9])
    # cv2_threshold_BINARY(gray_car_image, [120, 130, 140, 150, 160])
-   
     #cv2_threshold_BINARY_OTSU(gray_car_image, [.5, .500015, .51, .515, .52])
     #cv2_threshold_blur(gray_car_image, .49)
     threshold_value = threshold_niblack(gray_car_image, k=0.01)
     th1 = gray_car_image > threshold_value
-   # threshold_value = threshold_niblack(gray_car_image, k=.001)
-   # th1 = gray_car_image > threshold_value
-    #ret1, th1 = cv2.threshold(gray_car_image, 135, 10,  cv2.THRESH_BINARY)
-    #th1 = cv2.morphologyEx(th1, cv2.MORPH_CLOSE, np.ones((6, 6), np.uint8))
     th1 = np.float32(th1)
-    
-    #th1 = cv2.dilate(th1, np.ones((2, 2), np.uint8), iterations=2)
-   # th1 = cv2.erode(th1, np.ones((2, 2), np.uint8), iterations=2)
-    #th1 = cv2.dilate(th1, np.ones((4, 4), np.uint8), iterations=2)
-    #th1 = cv2.erode(th1, np.ones((4, 4), np.uint8), iterations=1)
-    #th1 = cv2.dilate(th1, np.ones((4, 4), np.uint8), iterations=2)
-    #th1 = cv2.erode(th1, np.ones((4, 4), np.uint8), iterations=1)
-   # th1 = cv2.erode(th1, np.ones((2, 2), np.uint8), iterations=3)
-   
     binary_car_image = th1
-    #close_transformation(binary_car_image)
-    #dilate_transformation(binary_car_image)
-   # close_transformation(binary_car_image)
    # fig, ax1 = plt.subplots(1)
     #ax1.imshow(binary_car_image)
     label_image = measure.label(binary_car_image, background=0, connectivity=1)
@@ -401,7 +357,6 @@ def get_plate_coor(gray_image,asasa):
     direction_o = current_dir + '/images/plate_loc/' + "original" + '_%s.jpg' % counter_o
     direction_m = current_dir + '/images/plate_loc/' + "masks" + '_%s.jpg' % counter_m
     direction_mix = current_dir + '/images/plate_loc/' + "mix" + '_%s.jpg' % counter_mix
-
     logo = license_plate_mask
     room = asasa
     nah, logo_mask = cv2.threshold(logo[:, :, 0], 20, 255, cv2.THRESH_BINARY)
@@ -414,61 +369,32 @@ def get_plate_coor(gray_image,asasa):
     cv2.imwrite(direction_mix, room2)
     # print(plate_objects_cordinates)
     return plate_objects_cordinates
-
 def filter_color(img, lower_red,upper_red):
-    
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     th1 = cv2.inRange(hsv, lower_red, upper_red)
     fig1, ax1 = plt.subplots(1)
     ax1.imshow(th1)
     plt.title('k 1')
-
 def plate_segmentation(plate_like_objects,plate_like_objects2):
     chars = []
     col = []
-
     for i in range(len(plate_like_objects)):
         license_plate_rgb = plate_like_objects2[i]
         license_plate_o = plate_like_objects[i]
         license_plate = license_plate_o
         #first_filters(license_plate)
-
- #skimage_niblack(license_plate, [0.1, 0.3, 0.5, 0.7, 0.9])
+        #skimage_niblack(license_plate, [0.1, 0.3, 0.5, 0.7, 0.9])
         #cv2_threshold_BINARY(license_plate, [0, 100, 150, 200, 240])
         #cv2_threshold_BINARY_OTSU(license_plate, [0, 100, 150, 200, 240])
         #cv2_threshold_blur(license_plate, .5)
-       # skimage_niblack(license_plate, [0.1, 0.3, 0.5, 0.7, 0.9])
-       # cv2_threshold_BINARY(license_plate, [0, 100, 150, 200, 240])
-       # cv2_threshold_BINARY_OTSU(license_plate, [0, 100, 150, 200, 240])
-       # cv2_threshold_blur(license_plate, .5)
-        #threshold_value = threshold_niblack(license_plate, k=.5)
-       # th1 = license_plate > threshold_value
-        #ret1, th1 = cv2.threshold(license_plate, 130, 255, cv2.THRESH_BINARY)
         hsv = cv2.cvtColor(license_plate_rgb, cv2.COLOR_BGR2HSV)
-       # filter_color(license_plate_rgb, np.array([0, 43, 0]),np.array([255, 240, 255]))
-        #filter_color(license_plate_rgb, np.array([0, 44, 0]),np.array([255, 240, 255]))
-       ## filter_color(license_plate_rgb, np.array([0, 45, 0]),np.array([255, 240, 255]))
-       # filter_color(license_plate_rgb, np.array([0, 46, 0]),np.array([255, 240, 255]))
-       # filter_color(license_plate_rgb, np.array([0, 47, 0]),np.array([255, 240, 255]))
-       # filter_color(license_plate_rgb, np.array([0, 48, 0]),np.array([255, 240, 255]))
         lower_red = np.array([0, 48, 0])
         upper_red = np.array([255, 240, 255])
-
         th1 = cv2.inRange(hsv, lower_red, upper_red)
-        #th1 = cv2.dilate(th1, np.ones((2, 2), np.uint8), iterations=2)
         binary_license_plate = th1
-       # open_transformation(binary_license_plate)
-
         binary_license_plate = np.float32(binary_license_plate)
         binary_license_plate = abs(binary_license_plate - 255)
-       # binary_license_plate = cv2.morphologyEx(np.float32(binary_license_plate), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
-       # binary_license_plate = cv2.morphologyEx(np.float32(binary_license_plate), cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
-
-       # open_transformation(binary_license_plate)
-      #  close_transformation(binary_license_plate)
         binary_license_plate = abs(binary_license_plate - 255)
-        #binary_license_plate = cv2.morphologyEx(np.float32(binary_license_plate), cv2.MORPH_OPEN,
-                                               # np.ones((2, 2), np.uint8))
         labelled_plate = measure.label(binary_license_plate, background=1, connectivity=1)
        # fig, ax1 = plt.subplots(1)
        # ax1.imshow(binary_license_plate)
@@ -484,7 +410,6 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
         cv2.rectangle(license_plate_mask, (0, 0), (license_plate_mask.shape[1], license_plate_mask.shape[0]),
                       (127, 0, 0), -1)
         for regions in sorted(regionprops(labelled_plate), key=lambda r: r.area, reverse=True,):
-
             if regions.area < 100:
                 continue
             if regions.area > 20000:
@@ -520,14 +445,12 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
                         resized_char = resize(roi, (20, 40))
                         characters.append(resized_char)
                         column_list.append(x0)
-
                         cv2.rectangle(license_plate_mask, (x0, y0), (x1, y1), (0,0,127), -1)
                         cv2.rectangle(license_plate_mask, (x0 , y0 ), (x1, y1 ), (0, 127, 0), 2)
                         files = [f for f in listdir(current_dir + '/images/letters_from_videos/')]
                         counter = len(files)
                         direction = current_dir + '/images/letters_from_videos/' + "letter" + '_%s.jpg' % counter
                         cv2.imwrite(direction, roi)
-
                 if len(centroids) != 0:
                     distances = []
                     for centroid in centroids:
@@ -542,7 +465,6 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
                             characters.append(resized_char)
                             column_list.append(x0)
                             #print(license_plate_mask)
-
                             cv2.rectangle(license_plate_mask, (x0, y0), (x1, y1), (0,0,127), -1)
                             cv2.rectangle(license_plate_mask, (x0, y0), (x1, y1), (0, 127, 0), 2)
                             files = [f for f in listdir(current_dir + '/images/letters_from_videos/')]
@@ -565,10 +487,8 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
         logo_mask = abs(logo_mask - 255)
         room2 = room.copy()
         room2[np.where(logo_mask == 0)] = logo[np.where(logo_mask == 0)]
-
        # fig2, ax2 = plt.subplots(1)
         #ax2.imshow((room2* 255).astype(np.uint8))
-
         col.append(column_list)
         chars.append(characters)
         #plt.show()
@@ -578,8 +498,6 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
             cv2.imwrite(direction_m, license_plate_mask)
             cv2.imwrite(direction_mix, room2)
     return chars, col
-
-
 def plate_prediction(chars_list, col_index):
     plates_numbers = []
     for each_str, each_col in zip(chars_list, col_index):
@@ -605,13 +523,10 @@ def plate_prediction(chars_list, col_index):
             rightplate_string = rightplate_string.replace('Q', '')
         plates_numbers.append(rightplate_string)
     return plates_numbers
-
 def gen2():
     t1 = time.time()
     video_path = "/home/mimus/apifave/vids/gwg3285.mp4"
-
     video_capture = cv2.VideoCapture(video_path)
-
     while True:
         ret, frame = video_capture.read()
         if ret:
@@ -635,9 +550,7 @@ def gen2():
                 for plate_number in plate_numbers:
                     if plate_number is not None:
                         number_and_plate.append([plate_number, y_min2, x_min2, y_max2, x_max2])
-
                         if plate_number is not "No_plate" and len(plate_number) > 3:
-
                             plate_to_save = frame[y_min:y_max, x_min:x_max]
                             #cv2.putText(plate_to_save, plate_number, (30, 30),
                                         #cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
@@ -645,7 +558,6 @@ def gen2():
                             counters = len(files)
                             direction = current_dir + '/images/recorded_plates/' + plate_number + '_%s.jpg' % counters
                             cv2.imwrite(direction, plate_to_save)
-
             for data_row in number_and_plate:
                 plate_number, y_min2, x_min2, y_max2, x_max2 = data_row[0], data_row[1], data_row[2], data_row[3], \
                                                                data_row[4]
@@ -661,7 +573,6 @@ def gen2():
                         if fuzz.ratio(plate_s, plate_number) > 99:
                             cv2.putText(frame_small, plate_s, (x_max2 + 6, y_max2 + 3),
                                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
-
             (flag, encodedImage) = cv2.imencode(".jpg", frame_small)
             yield b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + bytearray(encodedImage) + b'\r\n'
         else:
@@ -713,7 +624,6 @@ def gen2():
     video_capture.release()
     t2 = time.time()
     print(t2 - t1)
-
 #esto es ranpv
 # esto es apifave
 def functionist():
@@ -735,8 +645,6 @@ def functionist():
     dictionary = dict(zip(y, x))
     # print("encodes creados")
     return dictionary
-
-
 def face_rec(file, encodes):
     encodes = encodes.drop(columns=['index'])
     encodes["folio"] = encodes["folio"].astype(str)
@@ -762,8 +670,6 @@ def face_rec(file, encodes):
     z = dict_res["distance"]
     dict_res = {"personas": [{"folio": l, "nombre": k, "distance": m} for k, l, m in zip(x, y, z)]}
     return dict_res
-
-
 def encode_creation(encode, id_num, params):
     # print("inicio de creacion de encodes")
     nombre, folio = params["nombre"], params["folio"]
@@ -783,7 +689,6 @@ def encode_creation(encode, id_num, params):
     # print("fotografias guardadas, enrolamiento completo")
     return biden_values
 #aqui termina apifave
-
 def gen(encos):
     t1 = time.time()
     total = 0
@@ -797,16 +702,13 @@ def gen(encos):
     known_face_encodings = known_face_encodings.drop(columns=['folio'])
     known_face_encodings = known_face_encodings.drop(columns=['nombre'])
     face_locations = []
-
     face_names = []
     process_this_frame = True
     while True:
         noninteresting, frame = video_capture.read()
         rgb_small_frame = frame[:, :, ::-1]
-
         if process_this_frame:
             face_locations = fr.face_locations(rgb_small_frame)
-
             # if len(face_locations) > 0:
             # print("face_locations", face_locations)
             face_encodings = fr.face_encodings(rgb_small_frame, face_locations)
@@ -871,5 +773,3 @@ def gen(encos):
             break
         (flag, encodedImage) = cv2.imencode(".jpg", frame)
         yield b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + bytearray(encodedImage) + b'\r\n'
-
-
