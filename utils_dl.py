@@ -295,7 +295,7 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
             if regions.area > 10000:
                 continue
             # print(regions.area)
-            y0, x0, y1, x1 = regions.bbox[0]+1 , regions.bbox[1] , regions.bbox[2] , regions.bbox[3]
+            y0, x0, y1, x1 = regions.bbox[0] , regions.bbox[1] , regions.bbox[2] , regions.bbox[3]
             region_height, region_width = y1 - y0, x1 - x0
             #if region_width < .18 * region_height:
                # continue
