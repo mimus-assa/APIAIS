@@ -47,9 +47,7 @@ from tensorflow.keras.preprocessing.image import load_img
 tf.get_logger().setLevel('INFO')
 tf.autograph.set_verbosity(1)
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
-
 from keras.preprocessing.image import img_to_array
-
 config = ConfigProto()
 config.gpu_options.allow_growth = True
 session = InteractiveSession(config=config)
@@ -57,117 +55,87 @@ graph = tf.get_default_graph()
 current_dir = os.path.dirname(os.path.realpath(__file__))
 model_dir = os.path.join(current_dir, 'models/dl/anplr_t9921_gray_34ch.h5')
 model = models.load_model(model_dir)
-
-
 def get_model(img_size, num_classes):
     inputs = keras.Input(shape=img_size + (3,))
-
     ### [First half of the network: downsampling inputs] ###
-
     # Entry block
     x = layers.Conv2D(32, 3, strides=2, padding="same")(inputs)
     x = layers.BatchNormalization()(x)
     x = layers.Activation("relu")(x)
-
     previous_block_activation = x  # Set aside residual
-
     # Blocks 1, 2, 3 are identical apart from the feature depth.
     for filters in [64, 128, 256]:
         x = layers.Activation("relu")(x)
         x = layers.SeparableConv2D(filters, 3, padding="same")(x)
         x = layers.BatchNormalization()(x)
-
         x = layers.Activation("relu")(x)
         x = layers.SeparableConv2D(filters, 3, padding="same")(x)
         x = layers.BatchNormalization()(x)
-
         x = layers.MaxPooling2D(3, strides=2, padding="same")(x)
-
         # Project residual
         residual = layers.Conv2D(filters, 1, strides=2, padding="same")(
             previous_block_activation
         )
         x = layers.add([x, residual])  # Add back residual
         previous_block_activation = x  # Set aside next residual
-
     ### [Second half of the network: upsampling inputs] ###
-
     for filters in [256, 128, 64, 32]:
         x = layers.Activation("relu")(x)
         x = layers.Conv2DTranspose(filters, 3, padding="same")(x)
         x = layers.BatchNormalization()(x)
-
         x = layers.Activation("relu")(x)
         x = layers.Conv2DTranspose(filters, 3, padding="same")(x)
         x = layers.BatchNormalization()(x)
-
         x = layers.UpSampling2D(2)(x)
-
         # Project residual
         residual = layers.UpSampling2D(2)(previous_block_activation)
         residual = layers.Conv2D(filters, 1, padding="same")(residual)
         x = layers.add([x, residual])  # Add back residual
         previous_block_activation = x  # Set aside next residual
-
     # Add a per-pixel classification layer
     outputs = layers.Conv2D(num_classes, 3, activation="softmax", padding="same")(x)
-
     # Define the model
     model = keras.Model(inputs, outputs)
     return model
 def get_model3(img_size, num_classes):
     inputs = keras.Input(shape=img_size + (3,))
-
     ### [First half of the network: downsampling inputs] ###
-
     # Entry block
     x = layers.Conv2D(32, 3, strides=2, padding="same")(inputs)
     x = layers.BatchNormalization()(x)
     x = layers.Activation("relu")(x)
-
     previous_block_activation = x  # Set aside residual
-
     # Blocks 1, 2, 3 are identical apart from the feature depth.
     for filters in [64, 128, 256]:
         x = layers.Activation("relu")(x)
         x = layers.SeparableConv2D(filters, 3, padding="same")(x)
         x = layers.BatchNormalization()(x)
-
         x = layers.Activation("relu")(x)
         x = layers.SeparableConv2D(filters, 3, padding="same")(x)
         x = layers.BatchNormalization()(x)
-
         x = layers.MaxPooling2D(3, strides=2, padding="same")(x)
-
         # Project residual
         residual = layers.Conv2D(filters, 1, strides=2, padding="same")(
             previous_block_activation
         )
         x = layers.add([x, residual])  # Add back residual
         previous_block_activation = x  # Set aside next residual
-
     ### [Second half of the network: upsampling inputs] ###
-
     for filters in [256, 128, 64, 32]:
         x = layers.Activation("relu")(x)
         x = layers.Conv2DTranspose(filters, 3, padding="same")(x)
         x = layers.BatchNormalization()(x)
-
         x = layers.Activation("relu")(x)
         x = layers.Conv2DTranspose(filters, 3, padding="same")(x)
         x = layers.BatchNormalization()(x)
-
         x = layers.UpSampling2D(2)(x)
-
         # Project residual
         residual = layers.UpSampling2D(2)(previous_block_activation)
         residual = layers.Conv2D(filters, 1, padding="same")(residual)
         x = layers.add([x, residual])  # Add back residual
         previous_block_activation = x  # Set aside next residual
-
     # Add a per-pixel classification layer
     outputs = layers.Conv2D(num_classes, 3, activation="softmax", padding="same")(x)
-
     # Define the model
     model = keras.Model(inputs, outputs)
     return model
@@ -182,9 +150,7 @@ model3.load_weights(model_dir3)
 with open('dict_ocr_34.json', 'r') as f:
     labels = json.load(f)
 letters = list(labels)
-
 black_list = ["GMK8135", "GF66701", "GF66712", "04134"]
-
 sqlite3.register_adapter(np.int64, lambda val: int(val))
 shape_predictor = "data/shape_predictor_68_face_landmarks.dat"
 detector = dlib.get_frontal_face_detector()
@@ -199,15 +165,10 @@ predictor = dlib.shape_predictor(shape_predictor)
 train_dir = "/home/mimus/apifave/images/snap"
 def dilate_transformation(img):
     binary_car_image = img
-
     th1 = cv2.dilate(binary_car_image, np.ones((7, 1), np.uint8), iterations=2)
-
     th2 = cv2.dilate(binary_car_image, np.ones((8, 1), np.uint8), iterations=2)
-
     th3 = cv2.dilate(binary_car_image, np.ones((9, 1), np.uint8), iterations=2)
-
     th4 =cv2.dilate(binary_car_image, np.ones((10, 1), np.uint8), iterations=2)
-
     th5 = cv2.dilate(binary_car_image, np.ones((11, 1), np.uint8), iterations=2)
     fig1, ax1 = plt.subplots(1)
     ax1.imshow(th1)
@@ -227,15 +188,10 @@ def dilate_transformation(img):
     plt.show()
 def erode_transformation(img):
     binary_car_image = img
-
     th1 = cv2.erode(binary_car_image, np.ones((7, 1), np.uint8), iterations=2)
-
     th2 = cv2.erode(binary_car_image, np.ones((8, 1), np.uint8), iterations=2)
-
     th3 = cv2.erode(binary_car_image, np.ones((9, 1), np.uint8), iterations=2)
-
     th4 =cv2.erode(binary_car_image, np.ones((10, 1), np.uint8), iterations=2)
-
     th5 = cv2.erode(binary_car_image, np.ones((11, 1), np.uint8), iterations=2)
     fig1, ax1 = plt.subplots(1)
     ax1.imshow(th1)
@@ -256,9 +212,6 @@ def erode_transformation(img):
 #aqui comienza ranpv
 def get_plate_coor(gray_image,rgb_image):
     gray_car_image = gray_image 
- 
-    
-   
     #print(car_image)
     car_image = rgb_image #resize(rgb_image, (368, 640))
     with graph.as_default(), session.as_default():
@@ -276,7 +229,6 @@ def get_plate_coor(gray_image,rgb_image):
         0.4 * label_image.shape[1])
     min_height, max_height, min_width, max_width = plate_dimensions
     plate_objects_cordinates = []
-
     # print("aqui comienza regionprops")
     for region in regionprops(label_image):
         if region.area < 150:
@@ -301,12 +253,9 @@ def get_plate_coor(gray_image,rgb_image):
     plt.show()
     # print(plate_objects_cordinates)
     return plate_objects_cordinates
-
-
 def plate_segmentation(plate_like_objects,plate_like_objects2):
     chars = []
     col = []
-
     for i in range(len(plate_like_objects)):
         license_plate_rgb = plate_like_objects2[i]
         license_plate_o = plate_like_objects[i]
@@ -314,11 +263,6 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
         global model2, graph, session
         license_plate_to_seg = resize(license_plate_rgb, (112, 208))
         license_plate_to_seg = license_plate_to_seg*255
-        #print("license plate: ",license_plate_to_seg)
-        #path = "/home/mimus/apifave/images/saved_masks/reneameds/train/train_images/original_1_9.jpg"
-        #img2 = load_img(path, target_size=(112, 208), color_mode="rgb")
-        #img2 = tf.keras.preprocessing.image.img_to_array(img2)
-       # print("target ", img2)
         with graph.as_default(), session.as_default():
             val_preds = model2.predict(license_plate_to_seg[tf.newaxis, ...])
         mask = np.argmax(val_preds[0], axis=-1)
@@ -327,13 +271,10 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
         mask = img_to_array(mask)
         ret, th1 = cv2.threshold(mask, 50, 255, cv2.THRESH_BINARY)
         th1 = cv2.erode(np.float32(th1), np.ones((25, 1), np.uint8), iterations=1)
-       
         mask = th1
-	
         #fig, ax1 = plt.subplots(1)
         #ax1.imshow(mask)
         #plt.show()
-
         labelled_plate = measure.label(mask, background=1, connectivity=2)
         fig, ax1 = plt.subplots(1)
         ax1.imshow(mask, cmap="gray")
@@ -349,13 +290,12 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
         cv2.rectangle(license_plate_mask, (0, 0), (license_plate_mask.shape[1], license_plate_mask.shape[0]),
                       (127, 0, 0), -1)
         for regions in sorted(regionprops(labelled_plate), key=lambda r: r.area, reverse=True,):
-
             if regions.area < 30:
                 continue
             if regions.area > 10000:
                 continue
             # print(regions.area)
-            y0, x0, y1, x1 = regions.bbox[0]+1 , regions.bbox[1]+1 , regions.bbox[2]-1 , regions.bbox[3]-1
+            y0, x0, y1, x1 = regions.bbox[0]+1 , regions.bbox[1] , regions.bbox[2] , regions.bbox[3]
             region_height, region_width = y1 - y0, x1 - x0
             #if region_width < .18 * region_height:
                # continue
@@ -379,14 +319,12 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
                         resized_char = resize(roi, (20, 40))
                         characters.append(resized_char)
                         column_list.append(x0)
-
                         cv2.rectangle(license_plate_mask, (x0, y0), (x1, y1), (0,0,127), -1)
                         cv2.rectangle(license_plate_mask, (x0 , y0 ), (x1, y1 ), (0, 127, 0), 2)
                         files = [f for f in listdir(current_dir + '/images/letters_from_videos/')]
                         counter = len(files)
                         direction = current_dir + '/images/letters_from_videos/' + "letter" + '_%s.jpg' % counter
                         cv2.imwrite(direction, roi)
-
                 if len(centroids) != 0:
                     distances = []
                     for centroid in centroids:
@@ -401,7 +339,6 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
                             characters.append(resized_char)
                             column_list.append(x0)
                             #print(license_plate_mask)
-
                             cv2.rectangle(license_plate_mask, (x0, y0), (x1, y1), (0,0,127), -1)
                             cv2.rectangle(license_plate_mask, (x0, y0), (x1, y1), (0, 127, 0), 2)
                             files = [f for f in listdir(current_dir + '/images/letters_from_videos/')]
@@ -419,9 +356,7 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
         direction_m = current_dir + '/images/masks/' + "masks" + '_%s.jpg' % counter_m
         direction_mix = current_dir + '/images/masks/' + "mix" + '_%s.jpg' % counter_mix
         logo = license_plate_mask
-
         room = resize(license_plate_rgb, (112, 208))
-
         nah, logo_mask = cv2.threshold(logo[:, :, 0], 20, 255, cv2.THRESH_BINARY)
         logo_mask = abs(logo_mask - 255)
         room2 = room.copy()
@@ -438,8 +373,6 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
             cv2.imwrite(direction_m, license_plate_mask)
             cv2.imwrite(direction_mix, room2)
     return chars, col
-
-
 def plate_prediction(chars_list, col_index):
     plates_numbers = []
     for each_str, each_col in zip(chars_list, col_index):
@@ -470,7 +403,6 @@ def gen2():
     t1 = time.time()
     video_path = "/home/mimus/apifave/vids/gvv716b.mp4"
     video_capture = cv2.VideoCapture(video_path)
-
     while True:
         ret, frame = video_capture.read()
         if ret:
@@ -492,13 +424,10 @@ def gen2():
                 chars, cols = plate_segmentation([frame_gray[y_min:y_max, x_min:x_max]],[frame[y_min:y_max, x_min:x_max]])
                 plate_numbers = plate_prediction(chars, cols)
                 print(plate_numbers)
-
                 for plate_number in plate_numbers:
                     if plate_number is not None:
                         number_and_plate.append([plate_number, y_min2, x_min2, y_max2, x_max2])
-
                         if plate_number is not "No_plate" and len(plate_number) > 3:
-
                             plate_to_save = frame[y_min:y_max, x_min:x_max]
                             #cv2.putText(plate_to_save, plate_number, (30, 30),
                                         #cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
@@ -506,7 +435,6 @@ def gen2():
                             counters = len(files)
                             direction = current_dir + '/images/recorded_plates/' + plate_number + '_%s.jpg' % counters
                             cv2.imwrite(direction, plate_to_save)
-
             for data_row in number_and_plate:
                 plate_number, y_min2, x_min2, y_max2, x_max2 = data_row[0], data_row[1], data_row[2], data_row[3], \
                                                                data_row[4]
@@ -522,7 +450,6 @@ def gen2():
                         if fuzz.ratio(plate_s, plate_number) > 99:
                             cv2.putText(frame_small, plate_s, (x_max2 + 6, y_max2 + 3),
                                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
-
             (flag, encodedImage) = cv2.imencode(".jpg", frame_small)
             yield b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + bytearray(encodedImage) + b'\r\n'
         else:
@@ -531,22 +458,14 @@ def gen2():
             folder = current_dir + '/images/recorded_plates/'
             files = [f for f in listdir(folder)]
             files2 = []
-
             for file in files:
                 file2 = file.split("_", 1)
                 files2.append(file2[0])
-
             keys, counts = np.unique(files2, return_counts=True)
-
             x = 0.2*max(counts)
-
-
             for file in keys[np.where(counts <= x)]:
                 files2 = [y for y in files2 if y != file]
             keys, counts = np.unique(files2, return_counts=True)
-
-
-
             for key1 in keys:
                 #print("for", key1)
                 for key2 in keys:
@@ -555,7 +474,6 @@ def gen2():
                         #print(key1,counts[keys==key1], key2,counts[keys==key2], rati)
                         if counts[keys==key1] > counts[keys==key2]:
                             files2 = [y for y in files2 if y != key2]
-
             keys, counts = np.unique(files2, return_counts=True)
             plt.bar(keys, counts)
             plt.show()
@@ -584,8 +502,6 @@ def gen2():
     video_capture.release()
     t2 = time.time()
     print(t2 - t1)
-
-
 #esto es ranpv
 # esto es apifave
 def functionist():
@@ -607,8 +523,6 @@ def functionist():
     dictionary = dict(zip(y, x))
     # print("encodes creados")
     return dictionary
-
-
 def face_rec(file, encodes):
     encodes = encodes.drop(columns=['index'])
     encodes["folio"] = encodes["folio"].astype(str)
@@ -634,8 +548,6 @@ def face_rec(file, encodes):
     z = dict_res["distance"]
     dict_res = {"personas": [{"folio": l, "nombre": k, "distance": m} for k, l, m in zip(x, y, z)]}
     return dict_res
-
-
 def encode_creation(encode, id_num, params):
     # print("inicio de creacion de encodes")
     nombre, folio = params["nombre"], params["folio"]
@@ -655,7 +567,6 @@ def encode_creation(encode, id_num, params):
     # print("fotografias guardadas, enrolamiento completo")
     return biden_values
 #aqui termina apifave
-
 def gen(encos):
     t1 = time.time()
     total = 0
@@ -669,16 +580,13 @@ def gen(encos):
     known_face_encodings = known_face_encodings.drop(columns=['folio'])
     known_face_encodings = known_face_encodings.drop(columns=['nombre'])
     face_locations = []
-
     face_names = []
     process_this_frame = True
     while True:
         noninteresting, frame = video_capture.read()
         rgb_small_frame = frame[:, :, ::-1]
-
         if process_this_frame:
             face_locations = fr.face_locations(rgb_small_frame)
-
             # if len(face_locations) > 0:
             # print("face_locations", face_locations)
             face_encodings = fr.face_encodings(rgb_small_frame, face_locations)
@@ -743,5 +651,3 @@ def gen(encos):
             break
         (flag, encodedImage) = cv2.imencode(".jpg", frame)
         yield b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + bytearray(encodedImage) + b'\r\n'
-
-
