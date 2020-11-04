@@ -115,13 +115,70 @@ def get_model(img_size, num_classes):
     # Define the model
     model = keras.Model(inputs, outputs)
     return model
+def get_model3(img_size, num_classes):
+    inputs = keras.Input(shape=img_size + (3,))
 
+    ### [First half of the network: downsampling inputs] ###
+
+    # Entry block
+    x = layers.Conv2D(32, 3, strides=2, padding="same")(inputs)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation("relu")(x)
+
+    previous_block_activation = x  # Set aside residual
+
+    # Blocks 1, 2, 3 are identical apart from the feature depth.
+    for filters in [64, 128, 256]:
+        x = layers.Activation("relu")(x)
+        x = layers.SeparableConv2D(filters, 3, padding="same")(x)
+        x = layers.BatchNormalization()(x)
+
+        x = layers.Activation("relu")(x)
+        x = layers.SeparableConv2D(filters, 3, padding="same")(x)
+        x = layers.BatchNormalization()(x)
+
+        x = layers.MaxPooling2D(3, strides=2, padding="same")(x)
+
+        # Project residual
+        residual = layers.Conv2D(filters, 1, strides=2, padding="same")(
+            previous_block_activation
+        )
+        x = layers.add([x, residual])  # Add back residual
+        previous_block_activation = x  # Set aside next residual
+
+    ### [Second half of the network: upsampling inputs] ###
+
+    for filters in [256, 128, 64, 32]:
+        x = layers.Activation("relu")(x)
+        x = layers.Conv2DTranspose(filters, 3, padding="same")(x)
+        x = layers.BatchNormalization()(x)
+
+        x = layers.Activation("relu")(x)
+        x = layers.Conv2DTranspose(filters, 3, padding="same")(x)
+        x = layers.BatchNormalization()(x)
+
+        x = layers.UpSampling2D(2)(x)
+
+        # Project residual
+        residual = layers.UpSampling2D(2)(previous_block_activation)
+        residual = layers.Conv2D(filters, 1, padding="same")(residual)
+        x = layers.add([x, residual])  # Add back residual
+        previous_block_activation = x  # Set aside next residual
+
+    # Add a per-pixel classification layer
+    outputs = layers.Conv2D(num_classes, 3, activation="softmax", padding="same")(x)
+
+    # Define the model
+    model = keras.Model(inputs, outputs)
+    return model
 num_classes = 3
 model_dir2 = os.path.join(current_dir, 'models/dl/char_seg_plate_v9898_rgb.h5')
 model2 = get_model((112, 208), num_classes)
 model2.load_weights(model_dir2)
 # model._make_predict_function()
-
+model_dir3 = os.path.join(current_dir, 'models/dl/pls_368x640_rgb.h5')
+model3 = get_model3((368, 640), num_classes)
+model3.load_weights(model_dir3)
 with open('dict_ocr_34.json', 'r') as f:
     labels = json.load(f)
 letters = list(labels)
@@ -140,20 +197,80 @@ predictor = dlib.shape_predictor(shape_predictor)
 (leStart, leEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eyebrow"]
 (nStart, nEnd) = face_utils.FACIAL_LANDMARKS_IDXS["nose"]
 train_dir = "/home/mimus/apifave/images/snap"
+def dilate_transformation(img):
+    binary_car_image = img
 
-#aqui comienza ranpv
-def get_plate_coor(gray_image):
-    gray_car_image = gray_image
-    #threshold_value = threshold_otsu(gray_car_image)
-    #binary_car_image = gray_car_image > threshold_value
-    ret1, th1 = cv2.threshold(gray_car_image, 135, 10,  cv2.THRESH_BINARY)
-    # threshold_value = threshold_niblack(gray_car_image)
-    # binary_car_image = binary_car_image > threshold_value
-    th1 = cv2.dilate(np.float32(th1), np.ones((2, 2), np.uint8), iterations=2)
-    binary_car_image = abs(th1 - 255)
+    th1 = cv2.dilate(binary_car_image, np.ones((7, 1), np.uint8), iterations=2)
+
+    th2 = cv2.dilate(binary_car_image, np.ones((8, 1), np.uint8), iterations=2)
+
+    th3 = cv2.dilate(binary_car_image, np.ones((9, 1), np.uint8), iterations=2)
+
+    th4 =cv2.dilate(binary_car_image, np.ones((10, 1), np.uint8), iterations=2)
+
+    th5 = cv2.dilate(binary_car_image, np.ones((11, 1), np.uint8), iterations=2)
+    fig1, ax1 = plt.subplots(1)
+    ax1.imshow(th1)
+    plt.title('k 1')
     fig2, ax2 = plt.subplots(1)
-    ax2.imshow(binary_car_image, cmap="gray")
-    label_image = measure.label(binary_car_image, background=1, connectivity=2)
+    ax2.imshow(th2)
+    plt.title('k 2')
+    fig3, ax3 = plt.subplots(1)
+    ax3.imshow(th3)
+    plt.title('k 3')
+    fig4, ax4 = plt.subplots(1)
+    ax4.imshow(th4)
+    plt.title('k 4')
+    fig5, ax5 = plt.subplots(1)
+    ax5.imshow(th5)
+    plt.title('k 5 ')
+    plt.show()
+def erode_transformation(img):
+    binary_car_image = img
+
+    th1 = cv2.erode(binary_car_image, np.ones((7, 1), np.uint8), iterations=2)
+
+    th2 = cv2.erode(binary_car_image, np.ones((8, 1), np.uint8), iterations=2)
+
+    th3 = cv2.erode(binary_car_image, np.ones((9, 1), np.uint8), iterations=2)
+
+    th4 =cv2.erode(binary_car_image, np.ones((10, 1), np.uint8), iterations=2)
+
+    th5 = cv2.erode(binary_car_image, np.ones((11, 1), np.uint8), iterations=2)
+    fig1, ax1 = plt.subplots(1)
+    ax1.imshow(th1)
+    plt.title('k 1')
+    fig2, ax2 = plt.subplots(1)
+    ax2.imshow(th2)
+    plt.title('k 2')
+    fig3, ax3 = plt.subplots(1)
+    ax3.imshow(th3)
+    plt.title('k 3')
+    fig4, ax4 = plt.subplots(1)
+    ax4.imshow(th4)
+    plt.title('k 4')
+    fig5, ax5 = plt.subplots(1)
+    ax5.imshow(th5)
+    plt.title('k 5 ')
+    plt.show()
+#aqui comienza ranpv
+def get_plate_coor(gray_image,rgb_image):
+    gray_car_image = gray_image 
+ 
+    
+   
+    #print(car_image)
+    car_image = rgb_image #resize(rgb_image, (368, 640))
+    with graph.as_default(), session.as_default():
+        val_preds = model3.predict(car_image[tf.newaxis, ...])
+    mask = np.argmax(val_preds[0], axis=-1)
+    mask = np.expand_dims(mask, axis=-1)
+    mask = keras.preprocessing.image.array_to_img(mask)
+    mask = img_to_array(mask)
+    #ret, th1 = cv2.threshold(mask, 50, 255, cv2.THRESH_BINARY)
+    fig2, ax2 = plt.subplots(1)
+    ax2.imshow(mask)
+    label_image = measure.label(mask, background=1, connectivity=2)
     plate_dimensions = (
         0.02 * label_image.shape[0], 0.4 * label_image.shape[0], 0.01 * label_image.shape[1],
         0.4 * label_image.shape[1])
@@ -209,7 +326,10 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
         mask = keras.preprocessing.image.array_to_img(mask)
         mask = img_to_array(mask)
         ret, th1 = cv2.threshold(mask, 50, 255, cv2.THRESH_BINARY)
+        th1 = cv2.erode(np.float32(th1), np.ones((25, 1), np.uint8), iterations=1)
+       
         mask = th1
+	
         #fig, ax1 = plt.subplots(1)
         #ax1.imshow(mask)
         #plt.show()
@@ -235,7 +355,7 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
             if regions.area > 10000:
                 continue
             # print(regions.area)
-            y0, x0, y1, x1 = regions.bbox[0]+2 , regions.bbox[1]+2 , regions.bbox[2]-2 , regions.bbox[3]-2
+            y0, x0, y1, x1 = regions.bbox[0]+1 , regions.bbox[1]+1 , regions.bbox[2]-1 , regions.bbox[3]-1
             region_height, region_width = y1 - y0, x1 - x0
             #if region_width < .18 * region_height:
                # continue
@@ -346,6 +466,126 @@ def plate_prediction(chars_list, col_index):
             rightplate_string = rightplate_string.replace('Q', '')
         plates_numbers.append(rightplate_string)
     return plates_numbers
+def gen2():
+    t1 = time.time()
+    video_path = "/home/mimus/apifave/vids/gvv716b.mp4"
+    video_capture = cv2.VideoCapture(video_path)
+
+    while True:
+        ret, frame = video_capture.read()
+        if ret:
+            frame_small, frame_gray = cv2.resize(frame, (640, 368)), cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            frame_gray_small = cv2.cvtColor(frame_small, cv2.COLOR_BGR2GRAY)
+            coordinates = get_plate_coor(frame_gray_small, frame_small)
+            number_and_plate = []
+            for cordinate in coordinates:
+                y_min, x_min, y_max, x_max = cordinate[0] * 3, cordinate[1] * 3, cordinate[2] * 3, cordinate[3] * 3
+                y_min2, x_min2, y_max2, x_max2 = cordinate[0], cordinate[1], cordinate[2], cordinate[3]
+                if y_max2 > 345:
+                    continue
+                if y_min2 < 15:
+                    continue
+                if x_max2 > 625:
+                    continue
+                if x_min2 < 15:
+                    continue
+                chars, cols = plate_segmentation([frame_gray[y_min:y_max, x_min:x_max]],[frame[y_min:y_max, x_min:x_max]])
+                plate_numbers = plate_prediction(chars, cols)
+                print(plate_numbers)
+
+                for plate_number in plate_numbers:
+                    if plate_number is not None:
+                        number_and_plate.append([plate_number, y_min2, x_min2, y_max2, x_max2])
+
+                        if plate_number is not "No_plate" and len(plate_number) > 3:
+
+                            plate_to_save = frame[y_min:y_max, x_min:x_max]
+                            #cv2.putText(plate_to_save, plate_number, (30, 30),
+                                        #cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                            files = [f for f in listdir(current_dir + '/images/recorded_plates/')]
+                            counters = len(files)
+                            direction = current_dir + '/images/recorded_plates/' + plate_number + '_%s.jpg' % counters
+                            cv2.imwrite(direction, plate_to_save)
+
+            for data_row in number_and_plate:
+                plate_number, y_min2, x_min2, y_max2, x_max2 = data_row[0], data_row[1], data_row[2], data_row[3], \
+                                                               data_row[4]
+                if plate_number is not "No_plate":
+                    cv2.putText(frame_small, plate_number, (x_min2 - 6, y_min2 - 3),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                    cv2.rectangle(frame_small, (x_min2, y_min2), (x_max2, y_max2),
+                                  (0, 0, 255), 2)
+                    for plate_s in black_list:
+                        if fuzz.ratio(plate_s, plate_number) > 89 and fuzz.ratio(plate_s, plate_number) < 100:
+                            cv2.putText(frame_small, plate_s, (x_max2 + 6, y_max2 + 3),
+                                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                        if fuzz.ratio(plate_s, plate_number) > 99:
+                            cv2.putText(frame_small, plate_s, (x_max2 + 6, y_max2 + 3),
+                                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+
+            (flag, encodedImage) = cv2.imencode(".jpg", frame_small)
+            yield b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + bytearray(encodedImage) + b'\r\n'
+        else:
+            # aqui deberiamos intentar editar frame_small para que agrege a la derecha las palcas encontradas de la
+            # lista negra
+            folder = current_dir + '/images/recorded_plates/'
+            files = [f for f in listdir(folder)]
+            files2 = []
+
+            for file in files:
+                file2 = file.split("_", 1)
+                files2.append(file2[0])
+
+            keys, counts = np.unique(files2, return_counts=True)
+
+            x = 0.2*max(counts)
+
+
+            for file in keys[np.where(counts <= x)]:
+                files2 = [y for y in files2 if y != file]
+            keys, counts = np.unique(files2, return_counts=True)
+
+
+
+            for key1 in keys:
+                #print("for", key1)
+                for key2 in keys:
+                    rati = fuzz.ratio(key1,key2)
+                    if 70 < rati < 100:
+                        #print(key1,counts[keys==key1], key2,counts[keys==key2], rati)
+                        if counts[keys==key1] > counts[keys==key2]:
+                            files2 = [y for y in files2 if y != key2]
+
+            keys, counts = np.unique(files2, return_counts=True)
+            plt.bar(keys, counts)
+            plt.show()
+            lastplot = len(keys)
+            fig = plt.figure()
+            k = 1
+            for key in keys:
+                last_list = [f for f in files if f.split("_", 1)[0]==key]
+                print(last_list[1])
+                img = plt.imread(folder+last_list[1])
+                ax1 = fig.add_subplot(lastplot, 1, k)
+                ax1.imshow(img)
+                k +=1
+            plt.show()
+
+            for filename in listdir(folder):
+                file_path = os.path.join(folder, filename)
+                try:
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        os.unlink(file_path)
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)
+                except Exception as e:
+                    print('Failed to delete %s. Reason: %s' % (file_path, e))
+            break
+    video_capture.release()
+    t2 = time.time()
+    print(t2 - t1)
+
+
 #esto es ranpv
 # esto es apifave
 def functionist():
@@ -505,121 +745,3 @@ def gen(encos):
         yield b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + bytearray(encodedImage) + b'\r\n'
 
 
-def gen2():
-    t1 = time.time()
-    video_path = "/home/mimus/apifave/vids/gvv716b.mp4"
-    video_capture = cv2.VideoCapture(video_path)
-
-    while True:
-        ret, frame = video_capture.read()
-        if ret:
-            frame_small, frame_gray = cv2.resize(frame, (640, 360)), cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            frame_gray_small = cv2.cvtColor(frame_small, cv2.COLOR_BGR2GRAY)
-            coordinates = get_plate_coor(frame_gray_small)
-            number_and_plate = []
-            for cordinate in coordinates:
-                y_min, x_min, y_max, x_max = cordinate[0] * 3, cordinate[1] * 3, cordinate[2] * 3, cordinate[3] * 3
-                y_min2, x_min2, y_max2, x_max2 = cordinate[0], cordinate[1], cordinate[2], cordinate[3]
-                if y_max2 > 345:
-                    continue
-                if y_min2 < 15:
-                    continue
-                if x_max2 > 625:
-                    continue
-                if x_min2 < 15:
-                    continue
-                chars, cols = plate_segmentation([frame_gray[y_min:y_max, x_min:x_max]],[frame[y_min:y_max, x_min:x_max]])
-                plate_numbers = plate_prediction(chars, cols)
-                print(plate_numbers)
-
-                for plate_number in plate_numbers:
-                    if plate_number is not None:
-                        number_and_plate.append([plate_number, y_min2, x_min2, y_max2, x_max2])
-
-                        if plate_number is not "No_plate" and len(plate_number) > 3:
-
-                            plate_to_save = frame[y_min:y_max, x_min:x_max]
-                            #cv2.putText(plate_to_save, plate_number, (30, 30),
-                                        #cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-                            files = [f for f in listdir(current_dir + '/images/recorded_plates/')]
-                            counters = len(files)
-                            direction = current_dir + '/images/recorded_plates/' + plate_number + '_%s.jpg' % counters
-                            cv2.imwrite(direction, plate_to_save)
-
-            for data_row in number_and_plate:
-                plate_number, y_min2, x_min2, y_max2, x_max2 = data_row[0], data_row[1], data_row[2], data_row[3], \
-                                                               data_row[4]
-                if plate_number is not "No_plate":
-                    cv2.putText(frame_small, plate_number, (x_min2 - 6, y_min2 - 3),
-                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-                    cv2.rectangle(frame_small, (x_min2, y_min2), (x_max2, y_max2),
-                                  (0, 0, 255), 2)
-                    for plate_s in black_list:
-                        if fuzz.ratio(plate_s, plate_number) > 89 and fuzz.ratio(plate_s, plate_number) < 100:
-                            cv2.putText(frame_small, plate_s, (x_max2 + 6, y_max2 + 3),
-                                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-                        if fuzz.ratio(plate_s, plate_number) > 99:
-                            cv2.putText(frame_small, plate_s, (x_max2 + 6, y_max2 + 3),
-                                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
-
-            (flag, encodedImage) = cv2.imencode(".jpg", frame_small)
-            yield b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + bytearray(encodedImage) + b'\r\n'
-        else:
-            # aqui deberiamos intentar editar frame_small para que agrege a la derecha las palcas encontradas de la
-            # lista negra
-            folder = current_dir + '/images/recorded_plates/'
-            files = [f for f in listdir(folder)]
-            files2 = []
-
-            for file in files:
-                file2 = file.split("_", 1)
-                files2.append(file2[0])
-
-            keys, counts = np.unique(files2, return_counts=True)
-
-            x = 0.2*max(counts)
-
-
-            for file in keys[np.where(counts <= x)]:
-                files2 = [y for y in files2 if y != file]
-            keys, counts = np.unique(files2, return_counts=True)
-
-
-
-            for key1 in keys:
-                #print("for", key1)
-                for key2 in keys:
-                    rati = fuzz.ratio(key1,key2)
-                    if 70 < rati < 100:
-                        #print(key1,counts[keys==key1], key2,counts[keys==key2], rati)
-                        if counts[keys==key1] > counts[keys==key2]:
-                            files2 = [y for y in files2 if y != key2]
-
-            keys, counts = np.unique(files2, return_counts=True)
-            plt.bar(keys, counts)
-            plt.show()
-            lastplot = len(keys)
-            fig = plt.figure()
-            k = 1
-            for key in keys:
-                last_list = [f for f in files if f.split("_", 1)[0]==key]
-                print(last_list[1])
-                img = plt.imread(folder+last_list[1])
-                ax1 = fig.add_subplot(lastplot, 1, k)
-                ax1.imshow(img)
-                k +=1
-            plt.show()
-
-            for filename in listdir(folder):
-                file_path = os.path.join(folder, filename)
-                try:
-                    if os.path.isfile(file_path) or os.path.islink(file_path):
-                        os.unlink(file_path)
-                    elif os.path.isdir(file_path):
-                        shutil.rmtree(file_path)
-                except Exception as e:
-                    print('Failed to delete %s. Reason: %s' % (file_path, e))
-            break
-    video_capture.release()
-    t2 = time.time()
-    print(t2 - t1)
