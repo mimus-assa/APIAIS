@@ -18,7 +18,12 @@ app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 db = SQLAlchemy(app)
 db.create_all()
 
-
+list dir = ["data/models/dl/", "data/images/ANPR/data_gen/letters_from_videos/", "data/images/ANPR/data_gen/mask", "data/images/ANPR/data_gen/record_plates", "data/images/ANPR/data_gen/plate_loc/" , "data/images/ANPR/training", "data/images/ANPR/training/letters", "data/images/ANPR/training/mask_char_seg", "data/images/ANPR/training/mask_plate_loc", "data/images/ANPR/training/original_char_seg", "data/images/ANPR/training/orignal_plate_loc", "data/images/FaVe/enrolleds", "data/images/FaVe/snap/1", "data/notebooks", "data/vids"]
+for MYDIR in list_dir:
+    CHECK_FOLDER = os.path.isdir(MYDIR)
+    if not CHECK_FOLDER:
+        os.makedirs(MYDIR)
+        
 @app.route('/')
 def index():
     return render_template('index.html')
