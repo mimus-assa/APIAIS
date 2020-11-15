@@ -12,9 +12,7 @@ from OpenSSL import SSL
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-context = SSL.Context(SSL.PROTOCOL_TLSv1_2)
-context.use_privatekey_file('server.key')
-context.use_certificate_file('server.crt')
+
 
 app = Flask(__name__, )
 
@@ -24,7 +22,9 @@ app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 db = SQLAlchemy(app)
 db.create_all()
 
-list dir = ["data/models/dl/", "data/images/ANPR/data_gen/letters_from_videos/", "data/images/ANPR/data_gen/mask", "data/images/ANPR/data_gen/record_plates", "data/images/ANPR/data_gen/plate_loc/" , "data/images/ANPR/training", "data/images/ANPR/training/letters", "data/images/ANPR/training/mask_char_seg", "data/images/ANPR/training/mask_plate_loc", "data/images/ANPR/training/original_char_seg", "data/images/ANPR/training/orignal_plate_loc", "data/images/FaVe/enrolleds", "data/images/FaVe/snap/1", "data/notebooks", "data/vids"]
+
+
+list_dir = ["data/models/dl/", "data/images/ANPR/data_gen/letters_from_videos/", "data/images/ANPR/data_gen/mask", "data/images/ANPR/data_gen/record_plates", "data/images/ANPR/data_gen/plate_loc/", "data/images/ANPR/training", "data/images/ANPR/training/letters", "data/images/ANPR/training/mask_char_seg", "data/images/ANPR/training/mask_plate_loc", "data/images/ANPR/training/original_char_seg", "data/images/ANPR/training/orignal_plate_loc", "data/images/FaVe/enrolleds", "data/images/FaVe/snap/1", "data/notebooks", "data/vids"]
 for MYDIR in list_dir:
     CHECK_FOLDER = os.path.isdir(MYDIR)
     if not CHECK_FOLDER:
@@ -107,4 +107,4 @@ def page_not_found():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port='5000', debug=True, ssl_context=context)
+    app.run(host='0.0.0.0', port='5000', debug=True, ssl_context='adhoc')
