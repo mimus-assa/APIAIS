@@ -8,8 +8,14 @@ import time
 from flask_sqlalchemy import SQLAlchemy
 import pandas as pd
 from utils import face_rec, gen, encode_creation, functionist, gen2
+from OpenSSL import SSL
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+context = SSL.Context(SSL.PROTOCOL_TLSv1_2)
+context.use_privatekey_file('server.key')
+context.use_certificate_file('server.crt')
+
 app = Flask(__name__, )
 
 bootstrap = Bootstrap(app)
