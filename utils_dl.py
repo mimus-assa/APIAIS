@@ -196,7 +196,7 @@ predictor = dlib.shape_predictor(shape_predictor)
 (reStart, reEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eyebrow"]
 (leStart, leEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eyebrow"]
 (nStart, nEnd) = face_utils.FACIAL_LANDMARKS_IDXS["nose"]
-train_dir = "/home/mimus/apiais/data/images/FaVe/snap"
+train_dir = "data/images/FaVe/snap"
 def dilate_transformation(img):
     binary_car_image = img
 
@@ -343,15 +343,12 @@ def get_plate_coor(gray_image,rgb_image):
     mask = keras.preprocessing.image.array_to_img(mask)
     mask = img_to_array(mask)
     ret, mask = cv2.threshold(mask, 50, 255, cv2.THRESH_BINARY)
-   # fig3, ax3 = plt.subplots(1)
-    #ax3.imshow(mask)
     #cv2_threshold_BINARY(mask, [10, 75, 125, 175, 240])
-    
-    
   #  mask  = cv2.morphologyEx(np.float32(mask), cv2.MORPH_OPEN, np.ones((25, 25), np.uint8))
     #mask  = cv2.morphologyEx(np.float32(mask), cv2.MORPH_OPEN, np.ones((8, 8), np.uint8))
    # close_transformation(np.float32(mask))
     #mask  = cv2.morphologyEx(np.float32(mask), cv2.MORPH_CLOSE, np.ones((20, 20), np.uint8))
+    
     #fig2, ax2 = plt.subplots(1)
    # ax2.imshow(mask)
     label_image = measure.label(mask, background=1, connectivity=2)
@@ -590,7 +587,7 @@ def plate_prediction(chars_list, col_index):
     return plates_numbers
 def gen2():
     t1 = time.time()
-    video_path = "/home/mimus/apiais/data/vids/06159/06159_0.mp4"
+    video_path = "data/vids/06159/06159_0.mp4"
     video_capture = cv2.VideoCapture(video_path)
 
     while True:
@@ -709,7 +706,7 @@ def gen2():
 
 
 #esto es ranpv
-# esto es apifave
+# esto es FaVe
 def functionist():
     x = []
     y = []
@@ -766,17 +763,17 @@ def encode_creation(encode, id_num, params):
     biden_values.insert(loc=0, column="nombre", value=nombre)
     biden_values.insert(loc=0, column="folio", value=folio)
     biden_values.insert(loc=0, column="index", value=id_num)
-    for count, filename in enumerate(os.listdir("images/snap/1")):
-        dst = folio + "_" + str(count) + ".png"
-        src = 'images/snap/1/' + filename
-        dst = 'images/snap/1/' + dst
+    for count, filename in enumerate(os.listdir("data/images/FaVe/snap/1")):
+        dst = folio + "_" + str(count) + ".jpg"
+        src = 'data/images/FaVe/snap/1/' + filename
+        dst = 'data/images/FaVe/snap/1/' + dst
         os.rename(src, dst)
-    files = [file for file in listdir("/home/mimus/apiais/data/images/FaVe/snap" + "/1/")]
+    files = [file for file in listdir("data/images/FaVe/snap" + "/1/")]
     for file in files:
-        shutil.move('images/snap/1/' + file, '/home/mimus/apiais/data/images/FaVe/enrolleds')
+        shutil.move('data/images/FaVe/snap/1/' + file, '/data/images/FaVe/enrolleds')
     # print("fotografias guardadas, enrolamiento completo")
     return biden_values
-#aqui termina apifave
+#aqui termina FaVe
 
 def gen(encos):
     t1 = time.time()
@@ -842,7 +839,7 @@ def gen(encos):
             time.sleep(.1)
             nonimportance, frame2 = video_capture.read()
             frame3 = frame2.copy()
-            img_name = "/data/images/FaVe/snap/1/OpenCV_frame_{}.png".format(total)
+            img_name = "/data/images/FaVe/snap/1/OpenCV_frame_{}.jpg".format(total)
             # print("writhing", img_name)
             cv2.imwrite(img_name, frame3)
         if name_to_return != "noname":
@@ -865,6 +862,5 @@ def gen(encos):
             break
         (flag, encodedImage) = cv2.imencode(".jpg", frame)
         yield b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + bytearray(encodedImage) + b'\r\n'
-
 
 
