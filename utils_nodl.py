@@ -50,14 +50,10 @@ graph = tf.get_default_graph()
 current_dir = os.path.dirname(os.path.realpath(__file__))
 model_dir = os.path.join(current_dir, 'models/dl/anplr_t9921_gray_34ch.h5')
 model = models.load_model(model_dir)
-# model._make_predict_function()
-
 with open('dict_ocr_34.json', 'r') as f:
     labels = json.load(f)
 letters = list(labels)
-
 black_list = ["GMK8135", "GF66701", "GF66712", "04134"]
-
 sqlite3.register_adapter(np.int64, lambda val: int(val))
 shape_predictor = "data/shape_predictor_68_face_landmarks.dat"
 detector = dlib.get_frontal_face_detector()
@@ -69,7 +65,7 @@ predictor = dlib.shape_predictor(shape_predictor)
 (reStart, reEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eyebrow"]
 (leStart, leEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eyebrow"]
 (nStart, nEnd) = face_utils.FACIAL_LANDMARKS_IDXS["nose"]
-train_dir = "/home/mimus/apifave/images/snap/"
+train_dir = "/home/workstationhp/apifave/images/snap/"
 def skimage_niblack(img, ka):
     gray_car_image = img
     k0,k1,k2,k3,k4 = ka[0],ka[1],ka[2],ka[3],ka[4]
@@ -126,11 +122,11 @@ def cv2_threshold_BINARY(img, ka):
 def cv2_threshold_BINARY_OTSU(img, ka):
     gray_car_image = img
     k0,k1,k2,k3,k4 = ka[0],ka[1],ka[2],ka[3],ka[4]
-    ret1, th1 = cv2.threshold(gray_car_image, 127, k0,  cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    ret1, th2 = cv2.threshold(gray_car_image, 127, k1,  cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    ret1, th3 = cv2.threshold(gray_car_image, 127, k2,  cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    ret1, th4 = cv2.threshold(gray_car_image, 127, k3,  cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    ret1, th5 = cv2.threshold(gray_car_image, 127, k4,  cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    ret1, th1 = cv2.threshold(gray_car_image, k0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    ret1, th2 = cv2.threshold(gray_car_image, k1, 255, cv2.THRESH_BINARY  + cv2.THRESH_OTSU)
+    ret1, th3 = cv2.threshold(gray_car_image, k2, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    ret1, th4 = cv2.threshold(gray_car_image, k3, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    ret1, th5 = cv2.threshold(gray_car_image, k4, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     fig1, ax1 = plt.subplots(1)
     ax1.imshow(th1)
     plt.title('k 1')
@@ -149,7 +145,6 @@ def cv2_threshold_BINARY_OTSU(img, ka):
     plt.show()
 def cv2_threshold_blur(img,k):
     gray_car_image = img
-
     blur = cv2.GaussianBlur(gray_car_image, (3, 3), 0)
     ret4, th1 = cv2.threshold(blur, k, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     blur = cv2.GaussianBlur(gray_car_image, (5, 5), 0)
@@ -180,13 +175,12 @@ def first_filters(img):
     gray_car_image = img
     threshold_value = threshold_otsu(gray_car_image)
     th1 = gray_car_image > threshold_value
-    threshold_value = threshold_niblack(gray_car_image, k=.14)
+    threshold_value = threshold_niblack(gray_car_image)
     th2 = gray_car_image > threshold_value
-    ret3, th3 = cv2.threshold(gray_car_image, 121, 255, cv2.THRESH_BINARY)
+    ret3, th3 = cv2.threshold(gray_car_image, 70, 255, cv2.THRESH_BINARY)
     ret3, th4 = cv2.threshold(gray_car_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     blur = cv2.GaussianBlur(gray_car_image, (5, 5), 0)
     ret4, th5 = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
     fig1, ax1 = plt.subplots(1)
     ax1.imshow(th1)
     plt.title('skimg otsu')
@@ -205,11 +199,11 @@ def first_filters(img):
     plt.show()
 def open_transformation(img):
     binary_car_image = img
-    th1 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_OPEN, np.ones((2, 2), np.uint8))
-    th2 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
-    th3 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_OPEN, np.ones((4, 4), np.uint8))
-    th4 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
-    th5 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_OPEN, np.ones((6, 6), np.uint8))
+    th1 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_OPEN, np.ones((2, 1), np.uint8))
+    th2 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_OPEN, np.ones((3, 1), np.uint8))
+    th3 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_OPEN, np.ones((4, 1), np.uint8))
+    th4 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_OPEN, np.ones((5, 1), np.uint8))
+    th5 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_OPEN, np.ones((6, 1), np.uint8))
     fig1, ax1 = plt.subplots(1)
     ax1.imshow(th1)
     plt.title('k 1')
@@ -228,11 +222,11 @@ def open_transformation(img):
     plt.show()
 def close_transformation(img):
     binary_car_image = img
-    th1 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_CLOSE, np.ones((2, 2), np.uint8))
-    th2 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
-    th3 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_CLOSE, np.ones((4, 4), np.uint8))
-    th4 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
-    th5 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_CLOSE, np.ones((6, 6), np.uint8))
+    th1 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_CLOSE, np.ones((2, 1), np.uint8))
+    th2 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_CLOSE, np.ones((3, 1), np.uint8))
+    th3 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_CLOSE, np.ones((4, 1), np.uint8))
+    th4 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_CLOSE, np.ones((5, 1), np.uint8))
+    th5 = cv2.morphologyEx(np.float32(binary_car_image), cv2.MORPH_CLOSE, np.ones((6, 1), np.uint8))
     fig1, ax1 = plt.subplots(1)
     ax1.imshow(th1)
     plt.title('k 1')
@@ -250,18 +244,13 @@ def close_transformation(img):
     plt.title('k 5 ')
     plt.show()
 
-def erode_transformation(img,j):
+def erode_transformation(img):
     binary_car_image = img
-
-    th1 = cv2.erode(binary_car_image, np.ones((6, 1), np.uint8), iterations=j)
-
-    th2 = cv2.erode(binary_car_image, np.ones((7, 1), np.uint8), iterations=j)
-
-    th3 = cv2.erode(binary_car_image, np.ones((8, 1), np.uint8), iterations=j)
-
-    th4 =cv2.erode(binary_car_image, np.ones((9, 1), np.uint8), iterations=j)
-
-    th5 = cv2.erode(binary_car_image, np.ones((10, 1), np.uint8), iterations=j)
+    th1 = cv2.erode(binary_car_image, np.ones((1, 2), np.uint8), iterations=1)
+    th2 = cv2.erode(binary_car_image, np.ones((1, 3), np.uint8), iterations=1)
+    th3 = cv2.erode(binary_car_image, np.ones((1, 4), np.uint8), iterations=1)
+    th4 =cv2.erode(binary_car_image, np.ones((1, 5), np.uint8), iterations=1)
+    th5 = cv2.erode(binary_car_image, np.ones((1, 6), np.uint8), iterations=1)
     fig1, ax1 = plt.subplots(1)
     ax1.imshow(th1)
     plt.title('k 1')
@@ -280,16 +269,11 @@ def erode_transformation(img,j):
     plt.show()
 def dilate_transformation(img):
     binary_car_image = img
-
-    th1 = cv2.dilate(binary_car_image, np.ones((7, 1), np.uint8), iterations=1)
-
-    th2 = cv2.dilate(binary_car_image, np.ones((8, 1), np.uint8), iterations=1)
-
-    th3 = cv2.dilate(binary_car_image, np.ones((9, 1), np.uint8), iterations=1)
-
-    th4 =cv2.dilate(binary_car_image, np.ones((10, 1), np.uint8), iterations=1)
-
-    th5 = cv2.dilate(binary_car_image, np.ones((11, 1), np.uint8), iterations=1)
+    th1 = cv2.dilate(binary_car_image, np.ones((1, 2), np.uint8), iterations=1)
+    th2 = cv2.dilate(binary_car_image, np.ones((2, 1), np.uint8), iterations=1)
+    th3 = cv2.dilate(binary_car_image, np.ones((2, 2), np.uint8), iterations=1)
+    th4 =cv2.dilate(binary_car_image, np.ones((3, 3), np.uint8), iterations=1)
+    th5 = cv2.dilate(binary_car_image, np.ones((4, 4), np.uint8), iterations=1)
     fig1, ax1 = plt.subplots(1)
     ax1.imshow(th1)
     plt.title('k 1')
@@ -310,21 +294,31 @@ def dilate_transformation(img):
 #aqui comienza ranpv
 def get_plate_coor(gray_image,asasa):
     rgb_image = asasa.copy()
+    global first_filters, skimage_niblack
     gray_car_image = gray_image
-    #skimage_niblack(gray_car_image, [0.1, 0.3, 0.5, 0.7, 0.9])
-   # cv2_threshold_BINARY(gray_car_image, [120, 130, 140, 150, 160])
-    #cv2_threshold_BINARY_OTSU(gray_car_image, [.5, .500015, .51, .515, .52])
-    #cv2_threshold_blur(gray_car_image, .49)
-    threshold_value = threshold_niblack(gray_car_image, k=0.01)
-    th1 = gray_car_image > threshold_value
-    th1 = np.float32(th1)
+    #first_filters(gray_car_image)
+    #skimage_niblack(gray_car_image, [0.2, 0.13, 0.25, 0.27, 0.3])
+    #cv2_threshold_BINARY(gray_car_image, [220, 225, 230, 235, 240])
+    #cv2_threshold_BINARY_OTSU(gray_car_image, [10, 75, 150, 200, 250])
+    #cv2_threshold_blur(gray_car_image, 127)
+    ret4, th1 = cv2.threshold(gray_car_image, 230, 255, cv2.THRESH_BINARY )
+    #th1 = cv2.erode(th1, np.ones((3, 3), np.uint8), iterations=1)
+    th1 = cv2.dilate(th1, np.ones((3, 3), np.uint8), iterations=3)
+    #th1 = cv2.dilate(th1, np.ones((2, 2), np.uint8), iterations=1)
+    th1 = cv2.erode(th1, np.ones((3, 3), np.uint8), iterations=1)
+    th1 = cv2.dilate(th1, np.ones((3, 3), np.uint8), iterations=1)
+    th1 = cv2.dilate(th1, np.ones((3, 3), np.uint8), iterations=3)
+    th1 = cv2.erode(th1, np.ones((3, 3), np.uint8), iterations=3)
+    th1 = cv2.erode(th1, np.ones((5, 5), np.uint8), iterations=3)
+    th1 = cv2.dilate(th1, np.ones((5, 5), np.uint8), iterations=3)
+    th1 = cv2.dilate(th1, np.ones((5, 5), np.uint8), iterations=1)
     binary_car_image = th1
-   # fig, ax1 = plt.subplots(1)
+    #fig, ax1 = plt.subplots(1)
     #ax1.imshow(binary_car_image)
     label_image = measure.label(binary_car_image, background=0, connectivity=1)
     plate_dimensions = (
-        0.011 * label_image.shape[0],  0.9*label_image.shape[0], 0.011 * label_image.shape[1],
-        0.9*label_image.shape[1])
+        0.009 * label_image.shape[0],  0.8*label_image.shape[0], 0.009 * label_image.shape[1],
+        0.8*label_image.shape[1])
     min_height, max_height, min_width, max_width = plate_dimensions
     plate_objects_cordinates = []
     license_plate_mask = rgb_image
@@ -333,23 +327,23 @@ def get_plate_coor(gray_image,asasa):
     for region in regionprops(label_image):
         if region.area < 1500:
             continue
-        if region.area > 120000:
+        if region.area > 60000:
             continue
-        min_row, min_col, max_row, max_col = region.bbox[0]-2, region.bbox[1]-6, region.bbox[2]+2, region.bbox[3]+2
+        min_row, min_col, max_row, max_col = region.bbox[0], region.bbox[1], region.bbox[2], region.bbox[3]
         x0, y0,x1, y1 =  min_col, min_row, max_col, max_row
         region_height = max_row - min_row
         region_width = max_col - min_col
-        if region_width < 1.1 * region_height:
+        if region_width < 1.4 * region_height:
             continue
-        if region_width > 2.9 * region_height:
+        if region_width > 2.8 * region_height:
             continue
-        if y0 < 10:
+        if y0 < 80:
             continue
         if x0 <10:
             continue
-        if x1 > label_image.shape[1]-60:
+        if x1 > label_image.shape[1]-10:
             continue
-        if y1 > label_image.shape[0]-80:
+        if y1 > label_image.shape[0]-10:
             continue
         # print(region.bbox)
         if min_height <= region_height <= max_height and min_width <= region_width <= max_width and \
@@ -359,7 +353,7 @@ def get_plate_coor(gray_image,asasa):
                 plate_objects_cordinates.append((min_row, min_col, max_row, max_col))
                 cv2.rectangle(license_plate_mask, (x0, y0), (x1, y1), (0, 0, 127), -1)
                 cv2.rectangle(license_plate_mask, (x0, y0), (x1, y1), (0, 127, 0), 2)
-               # fig, ax1 = plt.subplots(1)
+                #fig, ax1 = plt.subplots(1)
                # ax1.imshow(gray_car_image[min_row:max_row, min_col:max_col], cmap="gray")
     files_m = [f for f in listdir(current_dir + '/images/plate_loc/') if "masks" in f]
     files_mix = [f for f in listdir(current_dir + '/images/plate_loc/') if "mix" in f]
@@ -384,13 +378,6 @@ def get_plate_coor(gray_image,asasa):
     # print(plate_objects_cordinates)
     return plate_objects_cordinates
 
-def filter_color(img, lower_red,upper_red):
-    
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    th1 = cv2.inRange(hsv, lower_red, upper_red)
-    fig1, ax1 = plt.subplots(1)
-    ax1.imshow(th1)
-    plt.title('k 1')
 
 def plate_segmentation(plate_like_objects,plate_like_objects2):
     chars = []
@@ -400,32 +387,48 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
         license_plate_rgb = plate_like_objects2[i]
         license_plate_o = plate_like_objects[i]
         license_plate = license_plate_o
-        #first_filters(license_plate)
+       # first_filters(license_plate)
 
- #skimage_niblack(license_plate, [0.1, 0.3, 0.5, 0.7, 0.9])
-        #cv2_threshold_BINARY(license_plate, [0, 100, 150, 200, 240])
-        #cv2_threshold_BINARY_OTSU(license_plate, [0, 100, 150, 200, 240])
-        #cv2_threshold_blur(license_plate, .5)
-       # skimage_niblack(license_plate, [0.1, 0.3, 0.5, 0.7, 0.9])
-       # cv2_threshold_BINARY(license_plate, [0, 100, 150, 200, 240])
-       # cv2_threshold_BINARY_OTSU(license_plate, [0, 100, 150, 200, 240])
-       # cv2_threshold_blur(license_plate, .5)
-        #threshold_value = threshold_niblack(license_plate, k=.5)
-       # th1 = license_plate > threshold_value
-        #ret1, th1 = cv2.threshold(license_plate, 130, 255, cv2.THRESH_BINARY)
-       
-       # filter_color(license_plate_rgb, np.array([0, 43, 0]),np.array([255, 240, 255]))
-        #filter_color(license_plate_rgb, np.array([0, 44, 0]),np.array([255, 240, 255]))
-       ## filter_color(license_plate_rgb, np.array([0, 45, 0]),np.array([255, 240, 255]))
-       # filter_color(license_plate_rgb, np.array([0, 46, 0]),np.array([255, 240, 255]))
-       # filter_color(license_plate_rgb, np.array([0, 47, 0]),np.array([255, 240, 255]))
-       # filter_color(license_plate_rgb, np.array([0, 48, 0]),np.array([255, 240, 255]))
+        #skimage_niblack(license_plate, [0.45, 0.55, 0.6, 0.65, 0.7])
+        #cv2_threshold_BINARY(license_plate, [155, 165, 175, 185, 195])
+        #cv2_threshold_BINARY_OTSU(license_plate, [0, 75, 150, 200, 250])
+        #cv2_threshold_blur(license_plate, 184)
+        #threshold_value = threshold_otsu(gray_car_image)
+        #ret1, th1 = cv2.threshold(license_plate, 74, 255, cv2.THRESH_BINARY)
         hsv = cv2.cvtColor(license_plate_rgb, cv2.COLOR_BGR2HSV)
-        lower_red = np.array([0, 48, 0])
-        upper_red = np.array([255, 240, 255])
-
+    
+        lower_red = np.array([0,0,160])
+        upper_red = np.array([255,255,220])
+    
         th1 = cv2.inRange(hsv, lower_red, upper_red)
-        #th1 = cv2.dilate(th1, np.ones((2, 2), np.uint8), iterations=2)
+        
+        #ret1, th1 = cv2.threshold(license_plate, 175, 255, cv2.THRESH_BINARY)
+        th1 = cv2.dilate(th1, np.ones((3, 3), np.uint8), iterations=1)
+        th1 = cv2.erode(th1, np.ones((3, 3), np.uint8), iterations=1)
+        th1 = cv2.erode(th1, np.ones((3, 3), np.uint8), iterations=1)
+        th1 = cv2.dilate(th1, np.ones((3, 3), np.uint8), iterations=1)
+        th1 = cv2.dilate(th1, np.ones((3, 3), np.uint8), iterations=1)
+        th1 = cv2.erode(th1, np.ones((3, 3), np.uint8), iterations=1)
+        th1 = cv2.dilate(th1, np.ones((3, 3), np.uint8), iterations=1)
+        #open_transformation(th1)
+        #close_transformation(th1)
+        #th1 = cv2.erode(th1, np.ones((2, 2), np.uint8), iterations=1)
+       # th1 = cv2.morphologyEx(np.float32(th1), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+       # th1 = cv2.morphologyEx(np.float32(th1), cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
+       # th1 = cv2.dilate(th1, np.ones((2, 2), np.uint8), iterations=3)
+       # th1 = cv2.morphologyEx(np.float32(th1), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+       # th1 = cv2.morphologyEx(np.float32(th1), cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
+       # th1 = cv2.dilate(th1, np.ones((2, 2), np.uint8), iterations=3)
+       # th1 = cv2.dilate(th1, np.ones((3, 3), np.uint8), iterations=1)
+     
+        #th1 = cv2.dilate(th1, np.ones((5, 5), np.uint8), iterations=1)
+       # th1 = cv2.erode(th1, np.ones((3, 3), np.uint8), iterations=1)
+
+        # threshold_value = threshold_niblack(license_plate, k=0.5)
+        # th2 = license_plate > threshold_value
+        #binary_license_plate = th2
+
+
         binary_license_plate = th1
        # open_transformation(binary_license_plate)
 
@@ -434,17 +437,17 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
        # binary_license_plate = cv2.morphologyEx(np.float32(binary_license_plate), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
        # binary_license_plate = cv2.morphologyEx(np.float32(binary_license_plate), cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
 
-       # open_transformation(binary_license_plate)
-      #  close_transformation(binary_license_plate)
+        #open_transform<    ation(binary_license_plate)
+        #close_transformation(binary_license_plate)
         binary_license_plate = abs(binary_license_plate - 255)
         #binary_license_plate = cv2.morphologyEx(np.float32(binary_license_plate), cv2.MORPH_OPEN,
                                                # np.ones((2, 2), np.uint8))
         labelled_plate = measure.label(binary_license_plate, background=1, connectivity=1)
        # fig, ax1 = plt.subplots(1)
-       # ax1.imshow(binary_license_plate)
+        #ax1.imshow(binary_license_plate)
         character_dimensions = (
-            0.35 * license_plate.shape[0], 0.65 * license_plate.shape[0], 0.0051 * license_plate.shape[1],
-            0.19 * license_plate.shape[1])
+            0.30 * license_plate.shape[0], 0.65 * license_plate.shape[0], 0.0051 * license_plate.shape[1],
+            0.17 * license_plate.shape[1])
         min_height, max_height, min_width, max_width = character_dimensions
         characters = []
         column_list = []
@@ -460,22 +463,20 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
             if regions.area > 20000:
                 continue
             # print(regions.area)
-            y0, x0, y1, x1 = regions.bbox[0]-2, regions.bbox[1]-2 , regions.bbox[2]+2 , regions.bbox[3]+2
+            y0, x0, y1, x1 = regions.bbox[0]-4 , regions.bbox[1]-2 , regions.bbox[2]+1 , regions.bbox[3]+1
             region_height, region_width = y1 - y0, x1 - x0
             if region_width < .0051 * region_height:
                 continue
-            if region_width > 2.6 * region_height:
+            if region_width > 1.1 * region_height:
                 continue
-            if x1 > license_plate.shape[1] - 5:
+            if x1 > license_plate.shape[1] - 2:
                 continue
-            if y0 < 10:
+            if y0 < 3:
                 continue
-            if y1 > license_plate.shape[0] - 10:
+            if y1 > license_plate.shape[0] - 2:
                 continue
-           # if region_height < 0.38*license_plate.shape[0]:
-            #    y1 +=int(0.28*region_height)
-           # if region_height < 0.41*license_plate.shape[0] and region_height > 0.38*license_plate.shape[0]:
-            #    y1 +=int(0.2*region_height)
+           # if# region_height < 0.33*license_plate.shape[0]:
+                #y1 +=int(0.4*region_height)
             #if region_height < 0.25*license_plate.shape[0]:
                 #y1 +=int(0.3*region_height)
             if x0 < 5:
@@ -484,8 +485,8 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
                 if len(centroids) == 0:
                     centroids.append(regions.centroid[1])
                     roi = license_plate[y0:y1, x0:x1]
-                  #  rect_border = patches.Rectangle((x0, y0), x1 - x0, y1 - y0, edgecolor="red", linewidth=2, fill=False)
-                  #  ax1.add_patch(rect_border)
+                    #rect_border = patches.Rectangle((x0, y0), x1 - x0, y1 - y0, edgecolor="red", linewidth=2, fill=False)
+                    #ax1.add_patch(rect_border)
                     if roi.shape[0] != 0 and roi.shape[1] != 0:
                         resized_char = resize(roi, (20, 40))
                         characters.append(resized_char)
@@ -506,8 +507,8 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
                     if all(i >= 0.15 * region_width for i in distances):
                         roi = license_plate[y0:y1, x0:x1]
                         if roi.shape[0] != 0 and roi.shape[1] != 0:
-                           #rect_border = patches.Rectangle((x0, y0), x1 - x0, y1 - y0, edgecolor="red", linewidth=2, fill=False)
-                           # ax1.add_patch(rect_border)
+                            #rect_border = patches.Rectangle((x0, y0), x1 - x0, y1 - y0, edgecolor="red", linewidth=2, fill=False)
+                            #ax1.add_patch(rect_border)
                             resized_char = resize(roi, (20, 40))
                             characters.append(resized_char)
                             column_list.append(x0)
@@ -543,7 +544,7 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
         chars.append(characters)
         #plt.show()
         #print(len(chars[0]))
-        if len(chars[0]) ==7:
+        if len(chars[0]) ==5:
             cv2.imwrite(direction_o, license_plate_rgb)
             cv2.imwrite(direction_m, license_plate_mask)
             cv2.imwrite(direction_mix, room2)
@@ -578,7 +579,7 @@ def plate_prediction(chars_list, col_index):
 
 def gen2():
     t1 = time.time()
-    video_path = "/home/mimus/apifave/vids/gwg3285.mp4"
+    video_path = "/home/workstationhp/apifave/vids/09196_2.mp4"
 
     video_capture = cv2.VideoCapture(video_path)
 
@@ -747,9 +748,9 @@ def encode_creation(encode, id_num, params):
         src = 'images/snap/1/' + filename
         dst = 'images/snap/1/' + dst
         os.rename(src, dst)
-    files = [file for file in listdir("/home/mimus/apifave/images/snap" + "/1/")]
+    files = [file for file in listdir("/home/workstationhp/apifave/images/snap" + "/1/")]
     for file in files:
-        shutil.move('images/snap/1/' + file, '/home/mimus/apifave/images/enrolleds/')
+        shutil.move('images/snap/1/' + file, '/home/workstationhp/apifave/images/enrolleds/')
     # print("fotografias guardadas, enrolamiento completo")
     return biden_values
 #aqui termina apifave
@@ -841,6 +842,5 @@ def gen(encos):
             break
         (flag, encodedImage) = cv2.imencode(".jpg", frame)
         yield b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + bytearray(encodedImage) + b'\r\n'
-
 
 
