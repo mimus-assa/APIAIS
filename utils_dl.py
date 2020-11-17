@@ -115,13 +115,69 @@ def get_model(img_size, num_classes):
     # Define the model
     model = keras.Model(inputs, outputs)
     return model
+def get_model3(img_size, num_classes):
+    inputs = keras.Input(shape=img_size + (3,))
 
+    ### [First half of the network: downsampling inputs] ###
+
+    # Entry block
+    x = layers.Conv2D(32, 3, strides=2, padding="same")(inputs)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation("relu")(x)
+
+    previous_block_activation = x  # Set aside residual
+
+    # Blocks 1, 2, 3 are identical apart from the feature depth.
+    for filters in [64, 128, 256]:
+        x = layers.Activation("relu")(x)
+        x = layers.SeparableConv2D(filters, 3, padding="same")(x)
+        x = layers.BatchNormalization()(x)
+
+        x = layers.Activation("relu")(x)
+        x = layers.SeparableConv2D(filters, 3, padding="same")(x)
+        x = layers.BatchNormalization()(x)
+
+        x = layers.MaxPooling2D(3, strides=2, padding="same")(x)
+
+        # Project residual
+        residual = layers.Conv2D(filters, 1, strides=2, padding="same")(
+            previous_block_activation
+        )
+        x = layers.add([x, residual])  # Add back residual
+        previous_block_activation = x  # Set aside next residual
+
+    ### [Second half of the network: upsampling inputs] ###
+
+    for filters in [256, 128, 64, 32]:
+        x = layers.Activation("relu")(x)
+        x = layers.Conv2DTranspose(filters, 3, padding="same")(x)
+        x = layers.BatchNormalization()(x)
+
+        x = layers.Activation("relu")(x)
+        x = layers.Conv2DTranspose(filters, 3, padding="same")(x)
+        x = layers.BatchNormalization()(x)
+
+        x = layers.UpSampling2D(2)(x)
+
+        # Project residual
+        residual = layers.UpSampling2D(2)(previous_block_activation)
+        residual = layers.Conv2D(filters, 1, padding="same")(residual)
+        x = layers.add([x, residual])  # Add back residual
+        previous_block_activation = x  # Set aside next residual
+
+    # Add a per-pixel classification layer
+    outputs = layers.Conv2D(num_classes, 3, activation="softmax", padding="same")(x)
+
+    # Define the model
+    model = keras.Model(inputs, outputs)
+    return model
 num_classes = 3
 model_dir2 = os.path.join(current_dir, 'data/models/dl/char_seg.h5')
 model2 = get_model((112, 208), num_classes)
 model2.load_weights(model_dir2)
+# model._make_predict_function()
 model_dir3 = os.path.join(current_dir, 'data/models/dl/loc_seg.h5')
-model3 = get_model((368, 640), num_classes)
+model3 = get_model3((368, 640), num_classes)
 model3.load_weights(model_dir3)
 with open('dict_ocr_34.json', 'r') as f:
     labels = json.load(f)
@@ -369,34 +425,35 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
         global model2, graph, session
         license_plate_to_seg = license_plate_rgb
         license_plate_to_seg = license_plate_to_seg*255
-        filter_color(np.float32(license_plate_to_seg), np.array([0, 145, 0]),np.array([255, 218, 255]))
-        filter_color(np.float32(license_plate_to_seg), np.array([0, 145, 0]),np.array([255, 218, 255]))
-        filter_color(np.float32(license_plate_to_seg), np.array([0, 145, 0]),np.array([255, 218, 255]))
-        filter_color(np.float32(license_plate_to_seg), np.array([0, 145, 0]),np.array([255, 218, 255]))
-        filter_color(np.float32(license_plate_to_seg), np.array([0, 145, 0]),np.array([255, 218, 255]))
-        filter_color(np.float32(license_plate_to_seg), np.array([0, 145, 0]),np.array([255, 218, 255]))
-        filter_color(np.float32(license_plate_to_seg), np.array([0, 145, 0]),np.array([255, 218, 255]))
-        filter_color(np.float32(license_plate_to_seg), np.array([0, 145, 0]),np.array([255, 218, 255]))
-        filter_color(np.float32(license_plate_to_seg), np.array([0, 145, 0]),np.array([255, 218, 255]))
+       
+        #filter_color(np.float32(license_plate_to_seg), np.array([0, 145, 0]),np.array([255, 218, 255]))
         #hsv = cv2.cvtColor(np.float32(license_plate_to_seg), cv2.COLOR_GRB2HSV)
-        lower_red = np.array([80, 0, 0])
-        upper_red = np.array([200, 255, 255])
-        th1 = cv2.inRange(np.float32(license_plate_rgb), lower_red, upper_red)
-        fig5, ax5 = plt.subplots(1)
-        ax5.imshow(th1)
+        #lower_red = np.array([80, 0, 0])
+        #upper_red = np.array([200, 255, 255])
+        #th1 = cv2.inRange(np.float32(license_plate_rgb), lower_red, upper_red)
+        #fig5, ax5 = plt.subplots(1)
+        #ax5.imshow(th1)
         with graph.as_default(), session.as_default():
             val_preds = model2.predict(license_plate_to_seg[tf.newaxis, ...])
         mask = np.argmax(val_preds[0], axis=-1)
         mask = np.expand_dims(mask, axis=-1)
         mask = keras.preprocessing.image.array_to_img(mask)
         mask = img_to_array(mask)
-	
-        ret, th1 = cv2.threshold(mask, 50, 255, cv2.THRESH_BINARY)
-        th1 = cv2.dilate(np.float32(th1), np.ones((15, 1), np.uint8), iterations=1)
-        th1 = cv2.erode(np.float32(th1), np.ones((15, 1), np.uint8), iterations=1)
+        fig5, ax5 = plt.subplots(1)
+        ax5.imshow(mask)
+        ret, th1 = cv2.threshold(mask, 100, 255, cv2.THRESH_BINARY)
+        fig6, ax6 = plt.subplots(1)
+        ax6.imshow(th1)
+        th1 = cv2.dilate(np.float32(th1), np.ones((25, 1), np.uint8), iterations=1)
+        th1 = cv2.erode(np.float32(th1), np.ones((25, 1), np.uint8), iterations=1)
+        th1 = cv2.dilate(np.float32(th1), np.ones((35, 1), np.uint8), iterations=1)
+        th1 = cv2.erode(np.float32(th1), np.ones((35, 1), np.uint8), iterations=1)
+        th1 = cv2.dilate(np.float32(th1), np.ones((36, 1), np.uint8), iterations=1)
+        th1 = cv2.erode(np.float32(th1), np.ones((36, 1), np.uint8), iterations=1)
+        th1 = cv2.dilate(np.float32(th1), np.ones((1, 10), np.uint8), iterations=1)
+        th1 = cv2.erode(np.float32(th1), np.ones((1, 10), np.uint8), iterations=1)        
         mask = th1
-       # fig, ax1 = plt.subplots(1)
-       # ax1.imshow(mask)
+       
        
         labelled_plate = measure.label(mask, background=1, connectivity=2)
         fig, ax1 = plt.subplots(1)
@@ -419,12 +476,12 @@ def plate_segmentation(plate_like_objects,plate_like_objects2):
             if regions.area > 10000:
                 continue
             # print(regions.area)
-            y0, x0, y1, x1 = regions.bbox[0] , regions.bbox[1] , regions.bbox[2] , regions.bbox[3]
+            y0, x0, y1, x1 = regions.bbox[0] , regions.bbox[1]-4 , regions.bbox[2] , regions.bbox[3]-2
             region_height, region_width = y1 - y0, x1 - x0
-            #if region_width < .18 * region_height:
-               # continue
-            #if region_width > 0.3 * region_height:
-               # continue
+            if region_width < .1 * region_height:
+                continue
+            if region_width > 0.6 * region_height:
+                continue
             if x1 > license_plate.shape[1] - 1:
                 continue
             if y0 < 1:
@@ -531,7 +588,7 @@ def plate_prediction(chars_list, col_index):
     return plates_numbers
 def gen2():
     t1 = time.time()
-    video_path = "data/vids/06159/06159_0.mp4"
+    video_path = "data/vids/09196_0.mp4"
     video_capture = cv2.VideoCapture(video_path)
 
     while True:
@@ -806,5 +863,6 @@ def gen(encos):
             break
         (flag, encodedImage) = cv2.imencode(".jpg", frame)
         yield b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + bytearray(encodedImage) + b'\r\n'
+
 
 
