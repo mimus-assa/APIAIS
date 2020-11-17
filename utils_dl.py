@@ -55,7 +55,7 @@ config.gpu_options.allow_growth = True
 session = InteractiveSession(config=config)
 graph = tf.get_default_graph()
 current_dir = os.path.dirname(os.path.realpath(__file__))
-model_dir = os.path.join(current_dir, 'data/models/dl/anplr_t9921_gray_34ch.h5')
+model_dir = os.path.join(current_dir, 'data/models/dl/anplr_gray_34ch.h5')
 model = models.load_model(model_dir)
 
 
@@ -172,11 +172,11 @@ def get_model3(img_size, num_classes):
     model = keras.Model(inputs, outputs)
     return model
 num_classes = 3
-model_dir2 = os.path.join(current_dir, 'data/models/dl/char_seg_plate_v9771_rgb.h5')
+model_dir2 = os.path.join(current_dir, 'data/models/dl/char_seg.h5')
 model2 = get_model((112, 208), num_classes)
 model2.load_weights(model_dir2)
 # model._make_predict_function()
-model_dir3 = os.path.join(current_dir, 'data/models/dl/loc_seg_plate_v9943_rgb.h5')
+model_dir3 = os.path.join(current_dir, 'data/models/dl/loc_seg.h5')
 model3 = get_model3((368, 640), num_classes)
 model3.load_weights(model_dir3)
 with open('dict_ocr_34.json', 'r') as f:
