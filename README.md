@@ -45,4 +45,18 @@ now that we have the weights we can use the website and the API to recognize fac
 
 ## API ANPR: application Program Interface for Automatic Number Plate Recognition
 
+now for the ANPR app we have first to generate the data, i have choised a path to solve this problem the main idea is to use the technique of **image segmentation** to do so, we need to create tre data bases, the first for the image segmentation of the whole plate number, the pictures should look like this
+<p align="center">
+  <img src = "https://i.imgur.com/6kPknyL.png">
+</p>
 
+here we can see that we are creating a mask from the original one, the idea is to generate several hundreds of this kind of pictures then train a neural network in order to predict how the mask should look from the original picture. The seccond data base we need is one for the image segmentation of the numbers and letters in the plate as we can see in the next picture
+<p align="center">
+  <img src = "https://i.imgur.com/ZTt00lK.png">
+</p>
+and the last one is just one data of letters and picture, it is worth to keep in mind that some letter cant be found the plates, such as the Q, O(letter o) y la letra I, todas por su parecido a los numeros 1 y 0
+
+
+<p align="center">
+  <img src = "https://i.imgur.com/a3u1904.png">
+</p>
