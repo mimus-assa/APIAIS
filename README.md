@@ -61,5 +61,5 @@ and the last one is just one data for the pictures of the letters, it is worth t
   <img src = "https://i.imgur.com/a3u1904.png">
 </p>
 
-once this is complete we proed to do ada augmentation and train for every dataset, this proceses are done whit the anpr notebooks files, when the weigths are saved on their path, we can start to perform real time ANPR analisis in the "/anpr" route.
+once this is complete we proced to do the dada augmentation and train for every dataset, this proceses are done whit the anpr notebooks files, when the weigths are saved on their path, we can start to perform real time ANPR analisis in the "/anpr" route.
 
