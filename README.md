@@ -54,9 +54,12 @@ here we can see that we are creating a mask from the original one, the idea is t
 <p align="center">
   <img src = "https://i.imgur.com/ZTt00lK.png">
 </p>
-and the last one is just one data of letters and picture, it is worth to keep in mind that some letter cant be found the plates, such as the Q, O(letter o) y la letra I, todas por su parecido a los numeros 1 y 0
+and the last one is just one data for the pictures of the letters, it is worth to keep in mind that some letter cant be found the plates, such as the Q, O(letter o) y la letra I, todas por su parecido a los numeros 1 y 0
 
 
 <p align="center">
   <img src = "https://i.imgur.com/a3u1904.png">
 </p>
+
+once this is complete we proed to do ada augmentation and train for every dataset, this proceses are done whit the anpr notebooks files, when the weigths are saved on their path, we can start to perform real time ANPR analisis in the "/anpr" route.
+
